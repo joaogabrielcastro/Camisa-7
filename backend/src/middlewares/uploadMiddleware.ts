@@ -12,6 +12,7 @@ export function ensureUploadDir() {
 }
 
 export const INVALID_IMAGE_TYPE_MESSAGE = "Apenas imagens JPEG, PNG, GIF ou WebP.";
+export const MAX_UPLOAD_FILE_SIZE_MB = 12;
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {
@@ -27,9 +28,12 @@ const storage = multer.diskStorage({
 
 export const uploadImageMiddleware = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: MAX_UPLOAD_FILE_SIZE_MB * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
-    const ok = /^image\/(jpeg|pjpeg|png|gif|webp)$/.test(file.mimetype);
+    const ext = path.extname(file.originalname).toLowerCase();
+    const validExt = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".jfif"];
+    const validMime = /^image\/(jpeg|jpg|pjpeg|png|gif|webp)$/.test(file.mimetype);
+    const ok = validMime || validExt.includes(ext);
     if (!ok) {
       cb(new Error(INVALID_IMAGE_TYPE_MESSAGE));
       return;

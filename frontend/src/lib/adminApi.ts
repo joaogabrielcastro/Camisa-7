@@ -60,10 +60,19 @@ export async function adminUploadImage(file: File): Promise<string> {
   const form = new FormData();
   form.append("imagem", file);
 
-  const res = await fetch(`${baseUrl()}/admin/upload`, {
-    method: "POST",
-    body: form
-  });
+  const url = `${baseUrl()}/admin/upload`;
+
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: "POST",
+      body: form
+    });
+  } catch {
+    throw new Error(
+      `Nao foi possivel contactar a API em ${url}. Confirme o backend (npm run dev na pasta backend) e NEXT_PUBLIC_API_URL.`
+    );
+  }
 
   if (!res.ok) throw new Error(await parseError(res));
   const data = (await res.json()) as { url?: string };

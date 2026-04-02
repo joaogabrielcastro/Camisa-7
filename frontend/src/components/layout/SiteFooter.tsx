@@ -3,6 +3,10 @@ import { Camera, MessageCircle } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 
 export function SiteFooter() {
+  const instagramUrl = process.env.NEXT_PUBLIC_INSTAGRAM_URL ?? "https://www.instagram.com/camisa_7_curitiba/";
+  const whatsappPhone = process.env.NEXT_PUBLIC_WHATSAPP_PHONE ?? "554192849191";
+  const whatsappUrl = `https://wa.me/${whatsappPhone}`;
+
   return (
     <footer className="mt-auto border-t-2 border-primary bg-neutral-900 text-neutral-100">
       <div className="mx-auto max-w-6xl px-4 py-8">
@@ -16,7 +20,7 @@ export function SiteFooter() {
           <div className="flex flex-col gap-3 sm:items-end">
             <div className="flex gap-2">
               <a
-                href="https://instagram.com"
+                href={instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-full border border-secondary/40 p-2 text-secondary transition hover:border-accent hover:text-accent"
@@ -25,7 +29,7 @@ export function SiteFooter() {
                 <Camera className="h-4 w-4" aria-hidden />
               </a>
               <a
-                href="https://wa.me/"
+                href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-full border border-secondary/40 p-2 text-secondary transition hover:border-accent hover:text-accent"
@@ -35,7 +39,7 @@ export function SiteFooter() {
               </a>
             </div>
             <Link
-              href="/home#catalogo"
+              href="/cliente#catalogo"
               className="font-body text-sm text-accent hover:text-secondary-light"
             >
               Ver camisas →

@@ -84,7 +84,7 @@ export function PhotoGalleryField({ urls, onChange, disabled, uploading, max = 1
         </ul>
       )}
       <p className="font-body text-[11px] text-neutral-500">
-        {urls.length}/{max} fotos · JPEG, PNG, GIF ou WebP · máx. 5 MB cada
+        {urls.length}/{max} fotos · JPEG, PNG, GIF ou WebP · máx. 12 MB cada
       </p>
     </div>
   );

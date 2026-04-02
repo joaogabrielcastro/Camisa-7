@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useCallback, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { ClickableProductImage } from "@/components/ClickableProductImage";
 import { PhotoGalleryField } from "@/components/admin/PhotoGalleryField";
@@ -162,6 +162,16 @@ function CreateProductForm({
   const [ativo, setAtivo] = useState(true);
   const [stocks, setStocks] = useState<Record<number, number>>({});
   const [busy, setBusy] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  /** Não amarrar ao `disabled` do painel: durante `loading` (ex.: botão Atualizar lista) o formulário inteiro fica desativado e o file input deixava de abrir — parecia "erro fantasma". */
+  const pickDisabled = busy || uploadingFoto || imagemUrls.length >= MAX_FOTOS;
+  const pickDisabledReason = busy
+    ? "Formulario ocupado no momento."
+    : uploadingFoto
+      ? "Upload em andamento."
+      : imagemUrls.length >= MAX_FOTOS
+        ? `Limite de ${MAX_FOTOS} fotos atingido.`
+        : null;
 
   useEffect(() => {
     setStocks((prev) => {
@@ -219,9 +229,9 @@ function CreateProductForm({
   }
 
   async function onEscolherFotos(e: ChangeEvent<HTMLInputElement>) {
-    const files = e.target.files;
+    const files = e.target.files ? Array.from(e.target.files) : [];
     e.target.value = "";
-    if (!files?.length) return;
+    if (!files.length) return;
     if (imagemUrls.length + files.length > MAX_FOTOS) {
       onError(`No maximo ${MAX_FOTOS} fotos.`);
       return;
@@ -229,12 +239,21 @@ function CreateProductForm({
     setUploadingFoto(true);
     try {
       const novas: string[] = [];
-      for (const f of Array.from(files)) {
-        novas.push(await adminUploadImage(f));
+      const falhas: string[] = [];
+      for (const f of files) {
+        try {
+          const url = await adminUploadImage(f);
+          novas.push(url);
+        } catch (err) {
+          falhas.push(`${f.name}: ${err instanceof Error ? err.message : "erro no upload"}`);
+        }
       }
-      setImagemUrls((prev) => [...prev, ...novas]);
-    } catch (err) {
-      onError(err instanceof Error ? err.message : "Erro ao enviar foto.");
+      if (novas.length > 0) {
+        setImagemUrls((prev) => [...prev, ...novas]);
+      }
+      if (falhas.length > 0) {
+        onError(`Algumas fotos falharam: ${falhas.join(" | ")}`);
+      }
     } finally {
       setUploadingFoto(false);
     }
@@ -301,19 +320,35 @@ function CreateProductForm({
             max={MAX_FOTOS}
           />
           <div className="mt-3">
-            <label className="inline-flex cursor-pointer">
-              <input
-                type="file"
-                multiple
-                accept="image/jpeg,image/png,image/gif,image/webp"
-                className="hidden"
-                onChange={(e) => void onEscolherFotos(e)}
-                disabled={disabled || busy || uploadingFoto || imagemUrls.length >= MAX_FOTOS}
-              />
-              <span className={`${btnOutline} cursor-pointer`}>
-                {uploadingFoto ? "A enviar..." : "Adicionar fotos"}
-              </span>
-            </label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={(e) => void onEscolherFotos(e)}
+              disabled={pickDisabled}
+              className="sr-only"
+              tabIndex={-1}
+              aria-hidden
+            />
+            <button
+              type="button"
+              className={btnOutline}
+              disabled={pickDisabled}
+              aria-label="Adicionar fotos ao produto"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {uploadingFoto ? "A enviar..." : "Adicionar fotos"}
+            </button>
+            {disabled && (
+              <p className="mt-1 font-body text-xs text-amber-800">
+                A carregar dados do painel (tamanhos/produtos). Pode já escolher fotos; outros campos podem estar
+                temporariamente bloqueados.
+              </p>
+            )}
+            {pickDisabledReason && (
+              <p className="mt-1 font-body text-xs text-neutral-500">{pickDisabledReason}</p>
+            )}
           </div>
         </div>
 
@@ -384,6 +419,8 @@ function ProductRow({
   const [stocks, setStocks] = useState<Record<number, number>>(() => stockMap(product, sizes));
   const [busy, setBusy] = useState(false);
   const [openPhotos, setOpenPhotos] = useState(false);
+  const rowFileInputRef = useRef<HTMLInputElement>(null);
+  const rowPickDisabled = busy || uploadingFoto || imagemUrls.length >= MAX_FOTOS;
 
   useEffect(() => {
     setPreco(product.preco.toString());
@@ -435,9 +472,9 @@ function ProductRow({
   }
 
   async function onAddFotos(e: ChangeEvent<HTMLInputElement>) {
-    const files = e.target.files;
+    const files = e.target.files ? Array.from(e.target.files) : [];
     e.target.value = "";
-    if (!files?.length) return;
+    if (!files.length) return;
     if (imagemUrls.length + files.length > MAX_FOTOS) {
       onError(`No maximo ${MAX_FOTOS} fotos.`);
       return;
@@ -445,12 +482,21 @@ function ProductRow({
     setUploadingFoto(true);
     try {
       const novas: string[] = [];
-      for (const f of Array.from(files)) {
-        novas.push(await adminUploadImage(f));
+      const falhas: string[] = [];
+      for (const f of files) {
+        try {
+          const url = await adminUploadImage(f);
+          novas.push(url);
+        } catch (err) {
+          falhas.push(`${f.name}: ${err instanceof Error ? err.message : "erro no upload"}`);
+        }
       }
-      setImagemUrls((prev) => [...prev, ...novas]);
-    } catch (err) {
-      onError(err instanceof Error ? err.message : "Erro ao enviar foto.");
+      if (novas.length > 0) {
+        setImagemUrls((prev) => [...prev, ...novas]);
+      }
+      if (falhas.length > 0) {
+        onError(`Algumas fotos falharam: ${falhas.join(" | ")}`);
+      }
     } finally {
       setUploadingFoto(false);
     }
@@ -560,19 +606,28 @@ function ProductRow({
               uploading={uploadingFoto}
               max={MAX_FOTOS}
             />
-            <label className="mt-3 inline-flex cursor-pointer">
+            <div className="mt-3">
               <input
+                ref={rowFileInputRef}
                 type="file"
                 multiple
-                accept="image/jpeg,image/png,image/gif,image/webp"
-                className="hidden"
+                accept="image/*"
                 onChange={(e) => void onAddFotos(e)}
-                disabled={busy || uploadingFoto || imagemUrls.length >= MAX_FOTOS}
+                disabled={rowPickDisabled}
+                className="sr-only"
+                tabIndex={-1}
+                aria-hidden
               />
-              <span className={`${btnOutline} cursor-pointer text-xs`}>
+              <button
+                type="button"
+                className={`${btnOutline} text-xs py-1.5 px-3`}
+                disabled={rowPickDisabled}
+                aria-label={`Adicionar mais fotos ao produto ${product.nome}`}
+                onClick={() => rowFileInputRef.current?.click()}
+              >
                 {uploadingFoto ? "A enviar..." : "Adicionar mais fotos"}
-              </span>
-            </label>
+              </button>
+            </div>
             <p className="mt-2 font-body text-xs text-neutral-500">
               Depois de alterar, clique em <strong>Salvar</strong> na linha do produto.
             </p>

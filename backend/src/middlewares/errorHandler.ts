@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import multer from "multer";
 import { ZodError } from "zod";
-import { INVALID_IMAGE_TYPE_MESSAGE } from "./uploadMiddleware";
+import { INVALID_IMAGE_TYPE_MESSAGE, MAX_UPLOAD_FILE_SIZE_MB } from "./uploadMiddleware";
 
 export function errorHandler(error: unknown, _req: Request, res: Response, _next: NextFunction) {
   if (error instanceof multer.MulterError) {
     if (error.code === "LIMIT_FILE_SIZE") {
-      return res.status(400).json({ message: "Ficheiro demasiado grande (max. 5 MB)." });
+      return res.status(400).json({ message: `Ficheiro demasiado grande (max. ${MAX_UPLOAD_FILE_SIZE_MB} MB).` });
     }
     return res.status(400).json({ message: error.message });
   }

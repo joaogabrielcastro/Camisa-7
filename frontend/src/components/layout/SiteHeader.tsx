@@ -7,9 +7,9 @@ import { BrandLogo } from "@/components/brand/BrandLogo";
 import { CartDrawer } from "./CartDrawer";
 
 const nav = [
-  { href: "/home#catalogo", label: "Início" },
-  { href: "/home?categoria=times#catalogo", label: "Clubes" },
-  { href: "/home?categoria=selecao#catalogo", label: "Seleções" }
+  { href: "/cliente#catalogo", label: "Início" },
+  { href: "/cliente?categoria=times#catalogo", label: "Clubes" },
+  { href: "/cliente?categoria=selecao#catalogo", label: "Seleções" }
 ];
 
 export function SiteHeader() {

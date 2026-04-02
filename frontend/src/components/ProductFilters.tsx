@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { X } from "lucide-react";
 
 const SIZES = ["P", "M", "G", "GG"] as const;
@@ -19,6 +19,7 @@ function chipTipoLabel(categoria: string): string {
 }
 
 export function ProductFilters() {
+  const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -35,7 +36,8 @@ export function ProductFilters() {
       if (next.categoria) params.set("categoria", next.categoria);
       else params.delete("categoria");
     }
-    router.push(`/home?${params.toString()}`);
+    const query = params.toString();
+    router.push(query ? `${pathname}?${query}` : pathname);
   }
 
   const chips: { key: string; label: string; clear: () => void }[] = [];
@@ -76,7 +78,7 @@ export function ProductFilters() {
             ))}
             <button
               type="button"
-              onClick={() => router.push("/home")}
+              onClick={() => router.push(pathname)}
               className="font-body text-[11px] text-accent underline"
             >
               Limpar
