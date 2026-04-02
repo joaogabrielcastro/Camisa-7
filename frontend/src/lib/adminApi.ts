@@ -1,9 +1,10 @@
 import type { Product } from "./types";
+import { resolveApiBaseUrl } from "./apiBaseUrl";
 
 export type SizeOption = { id: number; nome: string };
 
 function baseUrl() {
-  return (process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3333/api").replace(/\/+$/, "");
+  return resolveApiBaseUrl();
 }
 
 async function parseError(res: Response): Promise<string> {

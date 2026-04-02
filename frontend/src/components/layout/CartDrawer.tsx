@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Heart, Trash2, X } from "lucide-react";
 import type { Product } from "@/lib/types";
+import { resolveApiBaseUrl } from "@/lib/apiBaseUrl";
 import {
   FAVORITES_CHANGED_EVENT,
   FAVORITES_STORAGE_KEY,
@@ -13,9 +14,7 @@ import {
 } from "@/lib/favorites";
 
 function apiBase(): string {
-  const raw =
-    process.env.NEXT_PUBLIC_API_URL ?? process.env.API_URL ?? "http://127.0.0.1:3333/api";
-  return raw.replace(/\/+$/, "");
+  return resolveApiBaseUrl();
 }
 
 async function fetchProdutos(): Promise<Product[]> {

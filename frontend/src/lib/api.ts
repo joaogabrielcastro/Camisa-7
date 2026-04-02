@@ -1,11 +1,8 @@
 import { Product } from "./types";
+import { resolveApiBaseUrl } from "./apiBaseUrl";
 
 function apiBaseUrl(): string {
-  const raw =
-    process.env.API_URL ??
-    process.env.NEXT_PUBLIC_API_URL ??
-    "http://127.0.0.1:3333/api";
-  return raw.replace(/\/+$/, "");
+  return resolveApiBaseUrl();
 }
 
 async function apiFetch(path: string, init?: RequestInit): Promise<Response> {
@@ -16,8 +13,8 @@ async function apiFetch(path: string, init?: RequestInit): Promise<Response> {
   } catch {
     throw new Error(
       `Nao foi possivel conectar a API em ${url}. ` +
-        "Deixe o backend rodando (cd backend; npm run dev) e confira API_URL ou NEXT_PUBLIC_API_URL " +
-        "(em Windows use http://127.0.0.1:3333/api se localhost falhar)."
+        "Confira se o backend esta no ar, CORS e API_URL ou NEXT_PUBLIC_API_URL (pode ser so o dominio; /api e acrescentado). " +
+        "Em dev no Windows use http://127.0.0.1:3333/api se localhost falhar."
     );
   }
 }
