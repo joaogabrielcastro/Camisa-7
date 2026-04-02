@@ -31,18 +31,20 @@ const updateProductSchema = z
   .refine((obj) => Object.keys(obj).length > 0, { message: "Payload vazio." });
 
 export const productService = {
-  list(query: { tamanho?: string; categoria?: string; ativo?: string }) {
+  list(query: { tamanho?: string; categoria?: string; ativo?: string; busca?: string }) {
     return productRepository.list({
       tamanho: query.tamanho,
       categoria: query.categoria,
+      busca: query.busca,
       ativo: query.ativo === undefined ? true : query.ativo === "true"
     });
   },
 
-  listAdmin(query: { tamanho?: string; categoria?: string }) {
+  listAdmin(query: { tamanho?: string; categoria?: string; busca?: string }) {
     return productRepository.list({
       tamanho: query.tamanho,
-      categoria: query.categoria
+      categoria: query.categoria,
+      busca: query.busca
     });
   },
 

@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { Menu, Search, ShoppingBag, X } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { CartDrawer } from "./CartDrawer";
+import { SearchDrawer } from "./SearchDrawer";
 
 const nav = [
   { href: "/cliente#catalogo", label: "Início" },
@@ -15,11 +16,7 @@ const nav = [
 export function SiteHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-
-  const scrollToCatalogo = useCallback(() => {
-    document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth" });
-    setMobileOpen(false);
-  }, []);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   return (
     <>
@@ -42,17 +39,23 @@ export function SiteHeader() {
           <div className="flex items-center gap-0.5">
             <button
               type="button"
-              onClick={scrollToCatalogo}
+              onClick={() => {
+                setSearchOpen(true);
+                setMobileOpen(false);
+              }}
               className="rounded-full p-2 text-primary hover:bg-primary/10"
-              aria-label="Ver camisas"
+              aria-label="Buscar camisas"
             >
               <Search className="h-5 w-5" aria-hidden />
             </button>
             <button
               type="button"
-              onClick={() => setCartOpen(true)}
+              onClick={() => {
+                setCartOpen(true);
+                setMobileOpen(false);
+              }}
               className="rounded-full p-2 text-primary hover:bg-primary/10"
-              aria-label="Ajuda do pedido"
+              aria-label="Ver favoritos"
             >
               <ShoppingBag className="h-5 w-5" aria-hidden />
             </button>
@@ -107,6 +110,7 @@ export function SiteHeader() {
           </div>
         )}
       </header>
+      <SearchDrawer open={searchOpen} onClose={() => setSearchOpen(false)} />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
     </>
   );

@@ -14,7 +14,8 @@ export const productController = {
     const data = await productService.list({
       tamanho: req.query.tamanho as string | undefined,
       categoria: req.query.categoria as string | undefined,
-      ativo: req.query.ativo as string | undefined
+      ativo: req.query.ativo as string | undefined,
+      busca: (req.query.busca ?? req.query.q) as string | undefined
     });
     return res.json(data);
   },
@@ -22,7 +23,8 @@ export const productController = {
   async listAdmin(req: Request, res: Response) {
     const data = await productService.listAdmin({
       tamanho: req.query.tamanho as string | undefined,
-      categoria: req.query.categoria as string | undefined
+      categoria: req.query.categoria as string | undefined,
+      busca: (req.query.busca ?? req.query.q) as string | undefined
     });
     return res.json(data);
   },

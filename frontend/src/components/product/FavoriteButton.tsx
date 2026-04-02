@@ -2,33 +2,40 @@
 
 import { Heart } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import {
+  FAVORITES_CHANGED_EVENT,
+  FAVORITES_STORAGE_KEY,
+  normalizeFavoriteId,
+  readFavoriteIds,
+  notifyFavoritesChanged
+} from "@/lib/favorites";
 
-const STORAGE_KEY = "camisa-curitiba-favoritos";
-
-function readIds(): number[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as unknown;
-    return Array.isArray(parsed) ? parsed.filter((n) => typeof n === "number") : [];
-  } catch {
-    return [];
-  }
-}
-
-export function FavoriteButton({ productId, label }: { productId: number; label: string }) {
+export function FavoriteButton({ productId, label }: { productId: number | string; label: string }) {
+  const pid = normalizeFavoriteId(productId);
   const [active, setActive] = useState(false);
 
   useEffect(() => {
-    setActive(readIds().includes(productId));
-  }, [productId]);
+    if (pid === null) return;
+    const sync = () => setActive(readFavoriteIds().includes(pid));
+    sync();
+    window.addEventListener(FAVORITES_CHANGED_EVENT, sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener(FAVORITES_CHANGED_EVENT, sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, [pid]);
 
   const toggle = useCallback(() => {
-    const ids = readIds();
-    const next = ids.includes(productId) ? ids.filter((id) => id !== productId) : [...ids, productId];
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    setActive(next.includes(productId));
-  }, [productId]);
+    if (pid === null) return;
+    const ids = readFavoriteIds();
+    const next = ids.includes(pid) ? ids.filter((x) => x !== pid) : [...ids, pid];
+    localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(next));
+    setActive(next.includes(pid));
+    notifyFavoritesChanged();
+  }, [pid]);
+
+  if (pid === null) return null;
 
   return (
     <button

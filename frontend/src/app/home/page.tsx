@@ -7,7 +7,7 @@ import { getProducts } from "@/lib/api";
 export default async function HomePage({
   searchParams
 }: {
-  searchParams: { tamanho?: string; categoria?: string };
+  searchParams: { tamanho?: string; categoria?: string; busca?: string };
 }) {
   const products = await getProducts(searchParams);
 

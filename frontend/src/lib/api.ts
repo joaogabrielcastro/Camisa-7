@@ -22,10 +22,11 @@ async function apiFetch(path: string, init?: RequestInit): Promise<Response> {
   }
 }
 
-export async function getProducts(searchParams?: { tamanho?: string; categoria?: string }) {
+export async function getProducts(searchParams?: { tamanho?: string; categoria?: string; busca?: string }) {
   const params = new URLSearchParams();
   if (searchParams?.tamanho) params.set("tamanho", searchParams.tamanho);
   if (searchParams?.categoria) params.set("categoria", searchParams.categoria);
+  if (searchParams?.busca?.trim()) params.set("busca", searchParams.busca.trim());
 
   const qs = params.toString();
   const response = await apiFetch(`/produtos${qs ? `?${qs}` : ""}`, {

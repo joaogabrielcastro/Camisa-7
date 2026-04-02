@@ -5,6 +5,8 @@ type ListFilters = {
   tamanho?: string;
   categoria?: string;
   ativo?: boolean;
+  /** Texto livre (nome ou descrição, case-insensitive) */
+  busca?: string;
 };
 
 type UpsertSizeInput = {
@@ -117,6 +119,12 @@ export const productRepository = {
     if (filters.tamanho) {
       values.push(filters.tamanho);
       conditions.push(`t.nome = $${values.length}`);
+    }
+
+    const term = filters.busca?.trim();
+    if (term) {
+      values.push(`%${term}%`);
+      conditions.push(`(p.nome ILIKE $${values.length} OR p.descricao ILIKE $${values.length})`);
     }
 
     const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";

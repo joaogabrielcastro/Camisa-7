@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { X } from "lucide-react";
+import { Search, X } from "lucide-react";
 
 const SIZES = ["P", "M", "G", "GG"] as const;
 
@@ -25,8 +26,14 @@ export function ProductFilters() {
 
   const currentSize = searchParams.get("tamanho") ?? "";
   const currentCategory = searchParams.get("categoria") ?? "";
+  const currentBusca = searchParams.get("busca") ?? "";
+  const [buscaInput, setBuscaInput] = useState(currentBusca);
 
-  function setParams(next: { tamanho?: string; categoria?: string }) {
+  useEffect(() => {
+    setBuscaInput(currentBusca);
+  }, [currentBusca]);
+
+  function setParams(next: { tamanho?: string; categoria?: string; busca?: string }) {
     const params = new URLSearchParams(searchParams.toString());
     if (next.tamanho !== undefined) {
       if (next.tamanho) params.set("tamanho", next.tamanho);
@@ -35,6 +42,10 @@ export function ProductFilters() {
     if (next.categoria !== undefined) {
       if (next.categoria) params.set("categoria", next.categoria);
       else params.delete("categoria");
+    }
+    if (next.busca !== undefined) {
+      if (next.busca) params.set("busca", next.busca);
+      else params.delete("busca");
     }
     const query = params.toString();
     router.push(query ? `${pathname}?${query}` : pathname);
@@ -55,12 +66,48 @@ export function ProductFilters() {
       clear: () => setParams({ categoria: "" })
     });
   }
+  if (currentBusca) {
+    chips.push({
+      key: "busca",
+      label: `"${currentBusca.length > 24 ? `${currentBusca.slice(0, 24)}…` : currentBusca}"`,
+      clear: () => setParams({ busca: "" })
+    });
+  }
 
   return (
     <div
       id="catalogo-filtros"
       className="rounded-xl border border-neutral-300 bg-neutral-100 p-3 shadow-card sm:p-4"
     >
+      <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="mb-1.5 font-body text-[10px] font-medium uppercase text-neutral-800/60">Buscar</p>
+          <div className="flex gap-2">
+            <input
+              type="search"
+              value={buscaInput}
+              onChange={(e) => setBuscaInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  setParams({ busca: buscaInput.trim() });
+                }
+              }}
+              placeholder="Nome da camisa..."
+              className="min-w-0 flex-1 rounded-lg border border-neutral-300 bg-white px-3 py-2 font-body text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
+              aria-label="Buscar por nome"
+            />
+            <button
+              type="button"
+              onClick={() => setParams({ busca: buscaInput.trim() })}
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-primary px-3 py-2 font-sans text-sm font-semibold text-white hover:bg-primary-dark"
+            >
+              <Search className="h-4 w-4" aria-hidden />
+              Buscar
+            </button>
+          </div>
+        </div>
+      </div>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <span className="font-sans text-xs font-bold uppercase tracking-wide text-primary">Filtrar</span>
         {chips.length > 0 && (
