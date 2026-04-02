@@ -21,6 +21,11 @@ export const env = {
   host: process.env.BACKEND_HOST ?? "0.0.0.0",
   port,
   databaseUrl: requiredEnv("DATABASE_URL"),
+  /**
+   * Postgres na cloud costuma exigir TLS. Use `DATABASE_SSL=true` se a conexão falhar sem SSL.
+   * Em alguns hosts basta `?sslmode=require` na DATABASE_URL e não precisa desta flag.
+   */
+  databaseSsl: process.env.DATABASE_SSL === "true" || process.env.DATABASE_SSL === "1",
   /** URL publica do API (para links de imagens enviadas). Na VPS use https://api.seudominio.com */
   publicBaseUrl: (process.env.BACKEND_PUBLIC_URL ?? `http://127.0.0.1:${port}`).replace(/\/+$/, "")
 };
