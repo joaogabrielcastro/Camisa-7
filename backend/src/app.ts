@@ -10,6 +10,9 @@ const uploadDir = path.join(process.cwd(), "uploads");
 
 export const app = express();
 
+/** Coolify/Traefik: so req.secure e forwarded headers refletem HTTPS. */
+app.set("trust proxy", 1);
+
 app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static(uploadDir));
